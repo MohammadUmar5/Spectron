@@ -1,6 +1,15 @@
 @import "tailwindcss";
 
+@theme {
+    --color-textColor: #1d4640;
+    --color-accentColor: #eab23d;
+}
+
 :root {
-    min-width: 100vw;
-    min-height: 100vh;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
 }
