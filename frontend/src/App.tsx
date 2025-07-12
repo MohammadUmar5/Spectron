@@ -10,6 +10,8 @@ import {
 } from "./pages";
 import { ProtectedRoute, RedirectToDashboard } from "./components";
 
+import MapScreen from "./pages/app/MapScreen";
+
 function App() {
   return (
     <Routes>
@@ -20,6 +22,7 @@ function App() {
       <Route path="/about" element={<About />} />
       <Route path="/features" element={<Features />} />
       <Route path="/docs" element={<Docs />} />
+      <Route path="/map-view" element={<MapScreen />} />
 
       {/* Protected Paths */}
       <Route
