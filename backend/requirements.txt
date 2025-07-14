@@ -1,3 +1,6 @@
-fastapi
-uvicorn
-pydantic
+pystac-client
+planetary-computer
+rasterio
+shapely
+numpy
+opencv-python-headless
