@@ -4,3 +4,5 @@ rasterio
 shapely
 numpy
 opencv-python-headless
+fastapi
+uvicorn[standard]
