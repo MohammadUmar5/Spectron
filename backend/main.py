@@ -2,6 +2,7 @@ from src.aoi import get_bbox
 from src.analysis import perform_ndvi_analysis
 from fastapi import FastAPI
 from src.api.api_handler import router as search_router
+import uvicorn
 
 app = FastAPI(title="Satellite Data API", version="1.0.0")
 
@@ -36,4 +37,5 @@ def main():
         raise
 
 if __name__ == "__main__":
-    main()
+    # main()
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
