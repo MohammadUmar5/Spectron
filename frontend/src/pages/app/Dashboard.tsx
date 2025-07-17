@@ -1,35 +1,86 @@
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthProvider";
-import { logout } from "../../services/auth";
+import { useState } from "react";
+import MapView from "../../components/map/MapView";
+import SideBar from "../../components/map/SideBar";
+import { fetchNDVIAnalysis } from "../../services/backend";
 
 const Dashboard = () => {
-  const { isLoggedIn, hasProfile } = useAuth();
-  const navigate = useNavigate();
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [box, setBox] = useState<[number, number, number, number] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
 
-  const handleLogout = async () => {
+  const handleSubmit = async () => {
+    if (!startDate || !endDate || !box) {
+      alert("Please select dates and draw an area on the map.");
+      return;
+    }
+
+    setLoading(true);
+    setImages([]);
+
     try {
-      await logout();
-      navigate("/login");
-    } catch (error) {
-      console.error("Error logging out:", error);
+      const result = await fetchNDVIAnalysis({
+        start_date: startDate,
+        end_date: endDate,
+        min_lon: box[0],
+        min_lat: box[1],
+        max_lon: box[2],
+        max_lat: box[3],
+        max_size: 1024,
+      });
+
+      console.log("NDVI result:", result);
+
+      // Let's assume result.analysis.image_urls = string[]
+      const urls: string[] = result.analysis.image_urls ?? [];
+
+      setImages(urls);
+    } catch (err) {
+      console.error("Error fetching NDVI:", err);
+      alert("Failed to fetch NDVI data. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
-    <section className="w-screen min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#f9eee0] via-[#f3e2c7] to-[#e7d4b5]">
-      <h1 className="text-7xl font-bold mb-6 text-textColor">Dashboard</h1>
-      <p className="text-xl font-bold text-textColor">
-        {isLoggedIn ? "You are logged in" : "You are not logged in"}
-      </p>
-      <p className="text-xl font-bold text-textColor">
-        {hasProfile ? "You have a profile" : "You do not have a profile"}
-      </p>
-      <button
-        onClick={handleLogout}
-        className="mt-6 px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow hover:bg-red-600 transition cursor-pointer"
-      >
-        Log Out
-      </button>
-    </section>
+    <div className="flex flex-col h-full w-full">
+      <div className="flex flex-1">
+        <SideBar
+          startDate={startDate}
+          endDate={endDate}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
+          onSubmit={handleSubmit}
+        />
+        <MapView onBoxDrawn={setBox} />
+      </div>
+
+      <div className="w-full p-4 bg-white border-t max-h-[40vh] overflow-y-auto">
+        {loading ? (
+          <div className="text-center text-accentColor font-semibold animate-pulse">
+            🛰️ Fetching satellite imagery... please wait (~40 seconds)
+          </div>
+        ) : images.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {images.map((url, index) => (
+              <div key={index} className="rounded overflow-hidden shadow-md">
+                <img
+                  src={url}
+                  alt={`NDVI Image ${index + 1}`}
+                  className="w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500">
+            No imagery loaded yet.
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
