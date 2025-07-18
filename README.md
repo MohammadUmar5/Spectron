@@ -1,6 +1,6 @@
 # 🌍 Spectron
 
-**Spectron** is an offline, self-contained desktop application for detecting land cover and vegetation changes using multi-temporal LISS-4 and Sentinel imagery. Designed for simplicity and accuracy, Spectron enables users to select an Area of Interest and dates, then automatically processes satellite data to generate intelligible, false-alarm–resistant change maps—**no internet connection or remote sensing expertise required.**
+**Spectron** is an offline, self-contained desktop application for detecting land cover and vegetation changes using multi-temporal LISS-4 and Sentinel imagery. Designed for simplicity and accuracy, Spectron enables users to select an Area of Interest and dates, then automatically processes satellite data to generate intelligible, false-alarm–resistant change maps.
 
 
 ## 👥 Team Members
