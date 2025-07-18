@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import io
+from typing import Tuple, Optional
 
 def percentile_stretch(data, lower_percentile=2, upper_percentile=98):
     """
@@ -25,16 +27,15 @@ def percentile_stretch(data, lower_percentile=2, upper_percentile=98):
     
     return normalized
 
-def save_ndvi_diff(diff, output_path="ndvi_diff.png"):
+def create_ndvi_diff_image(diff) -> bytes:
     """
-    Save NDVI difference as a colored image using only OpenCV.
+    Create NDVI difference image and return as bytes for database storage.
     
     Args:
         diff: NDVI difference array (values typically between -1 and 1)
-        output_path: Output file path
     
     Returns:
-        str: Path to saved image
+        bytes: PNG image data as bytes
     """
     print(f"NDVI difference stats:")
     print(f"  Min: {diff.min():.3f}")
@@ -79,25 +80,24 @@ def save_ndvi_diff(diff, output_path="ndvi_diff.png"):
         colored = create_custom_diverging_colormap(diff_normalized)
         used_colormap = "Custom diverging"
     
-    # Save the image
-    success = cv2.imwrite(output_path, colored)
+    # Convert to bytes
+    success, buffer = cv2.imencode('.png', colored)
     if success:
-        print(f"Difference image saved using {used_colormap} colormap to: {output_path}")
-        return output_path
+        print(f"Difference image created using {used_colormap} colormap")
+        return buffer.tobytes()
     else:
-        raise Exception(f"Failed to save image to {output_path}")
+        raise Exception("Failed to encode difference image")
 
-def save_individual_images(ndvi, output_path="ndvi_image.png", title="NDVI"):
+def create_individual_ndvi_image(ndvi, title="NDVI") -> bytes:
     """
-    Save individual NDVI images with appropriate colormaps.
+    Create individual NDVI image and return as bytes for database storage.
     
     Args:
         ndvi: NDVI array (values typically between -1 and 1)
-        output_path: Output file path
         title: Title for the image (for logging)
     
     Returns:
-        str: Path to saved image
+        bytes: PNG image data as bytes
     """
     print(f"{title} stats:")
     print(f"  Min: {ndvi.min():.3f}")
@@ -139,13 +139,13 @@ def save_individual_images(ndvi, output_path="ndvi_image.png", title="NDVI"):
         colored = create_custom_vegetation_colormap(ndvi_normalized)
         used_colormap = "Custom vegetation"
     
-    # Save the image
-    success = cv2.imwrite(output_path, colored)
+    # Convert to bytes
+    success, buffer = cv2.imencode('.png', colored)
     if success:
-        print(f"{title} saved using {used_colormap} colormap to: {output_path}")
-        return output_path
+        print(f"{title} created using {used_colormap} colormap")
+        return buffer.tobytes()
     else:
-        raise Exception(f"Failed to save {title} to {output_path}")
+        raise Exception(f"Failed to encode {title}")
 
 def create_custom_diverging_colormap(normalized_data):
     """
@@ -229,18 +229,18 @@ def create_custom_vegetation_colormap(normalized_data):
     
     return colored
 
-def create_composite_image(early_ndvi, late_ndvi, diff, output_path="composite_ndvi.png"):
+def create_composite_image(early_ndvi, late_ndvi, diff) -> bytes:
     """
     Create a composite image showing all three visualizations side by side.
+    Returns bytes for database storage.
     
     Args:
         early_ndvi: Early NDVI array
         late_ndvi: Late NDVI array
         diff: NDVI difference array
-        output_path: Output file path
     
     Returns:
-        str: Path to saved composite image
+        bytes: PNG image data as bytes
     """
     # Resize all images to same size for composite
     height, width = early_ndvi.shape
@@ -264,12 +264,13 @@ def create_composite_image(early_ndvi, late_ndvi, diff, output_path="composite_n
     except:
         pass  # Skip text if not supported
     
-    success = cv2.imwrite(output_path, composite)
+    # Convert to bytes
+    success, buffer = cv2.imencode('.png', composite)
     if success:
-        print(f"Composite image saved to: {output_path}")
-        return output_path
+        print("Composite image created")
+        return buffer.tobytes()
     else:
-        raise Exception(f"Failed to save composite image to {output_path}")
+        raise Exception("Failed to encode composite image")
 
 def process_ndvi_for_composite(data, height, width, colormap_type):
     """Helper function to process NDVI data for composite image."""
