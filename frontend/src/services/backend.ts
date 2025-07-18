@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000/api/search";
+const API_URL = "https://spectron-ni3i.onrender.com/api/search";
 
 type NDVIQueryParams = {
   start_date: string;

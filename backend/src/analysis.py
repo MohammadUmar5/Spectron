@@ -7,7 +7,8 @@ from .search import search_items
 from .download import get_band_urls
 from .fetch import read_band_with_retry
 from .ndvi import compute_ndvi, diff_ndvi
-from .visualize import save_ndvi_diff, save_individual_images
+from .visualize import create_ndvi_diff_image, create_individual_ndvi_image, create_composite_image
+from .database.database import db_handler
 
 
 def find_best_image_pair(bbox, start_date, end_date, max_cloud_cover=20, 
@@ -194,20 +195,80 @@ def perform_ndvi_analysis(bbox, start_date, end_date, max_cloud_cover=15, max_si
     diff = diff_ndvi(ndvi1, ndvi2)
     print(f"NDVI difference range: {diff.min():.3f} to {diff.max():.3f}")
     
-    # Step 5: Save visualizations
-    print("\n=== STEP 5: SAVING VISUALIZATIONS ===")
+    # Step 5: Create visualizations and save to database
+    print("\n=== STEP 5: CREATING VISUALIZATIONS AND SAVING TO DATABASE ===")
     
     early_date = early_item.datetime.strftime('%Y-%m-%d')
     late_date = late_item.datetime.strftime('%Y-%m-%d')
     
-    early_path = save_individual_images(ndvi1, f"ndvi_early_{early_date}.png", "Early NDVI")
-    late_path = save_individual_images(ndvi2, f"ndvi_late_{late_date}.png", "Late NDVI")
-    diff_path = save_ndvi_diff(diff, f"ndvi_difference_{early_date}_to_{late_date}.png")
+    # Create image bytes for database storage
+    early_image_bytes = create_individual_ndvi_image(ndvi1, "Early NDVI")
+    late_image_bytes = create_individual_ndvi_image(ndvi2, "Late NDVI")
+    diff_image_bytes = create_ndvi_diff_image(diff)
     
-    print(f"\nAll visualizations saved:")
-    print(f"  Early NDVI: {early_path}")
-    print(f"  Late NDVI: {late_path}")
-    print(f"  Difference: {diff_path}")
+    # Prepare metadata for database
+    early_image_data = {
+        "id": early_item.id,
+        "datetime": str(early_item.datetime),
+        "cloud_cover": early_item.properties.get("eo:cloud_cover"),
+        "platform": early_item.properties.get("platform"),
+        "instruments": early_item.properties.get("instruments")
+    }
+    
+    late_image_data = {
+        "id": late_item.id,
+        "datetime": str(late_item.datetime),
+        "cloud_cover": late_item.properties.get("eo:cloud_cover"),
+        "platform": late_item.properties.get("platform"),
+        "instruments": late_item.properties.get("instruments")
+    }
+    
+    analysis_results = {
+        "time_gap_days": time_gap,
+        "mean_ndvi_change": float(diff.mean()),
+        "max_vegetation_loss": float(diff.min()),
+        "max_vegetation_gain": float(diff.max()),
+        "ndvi_statistics": {
+            "early": {
+                "min": float(ndvi1.min()),
+                "max": float(ndvi1.max()),
+                "mean": float(ndvi1.mean()),
+                "std": float(ndvi1.std())
+            },
+            "late": {
+                "min": float(ndvi2.min()),
+                "max": float(ndvi2.max()),
+                "mean": float(ndvi2.mean()),
+                "std": float(ndvi2.std())
+            },
+            "difference": {
+                "min": float(diff.min()),
+                "max": float(diff.max()),
+                "mean": float(diff.mean()),
+                "std": float(diff.std())
+            }
+        },
+        "selection_info": selection_info
+    }
+    
+    # Save to database
+    analysis_id = db_handler.save_analysis_results(
+        bbox=bbox,
+        start_date=start_date,
+        end_date=end_date,
+        selection_mode=selection_mode,
+        early_image_data=early_image_data,
+        late_image_data=late_image_data,
+        analysis_results=analysis_results,
+        early_ndvi_image=early_image_bytes,
+        late_ndvi_image=late_image_bytes,
+        difference_image=diff_image_bytes
+    )
+    
+    print(f"\nAll visualizations saved to database with analysis ID: {analysis_id}")
+    print(f"  Early NDVI image: {len(early_image_bytes)} bytes")
+    print(f"  Late NDVI image: {len(late_image_bytes)} bytes")
+    print(f"  Difference image: {len(diff_image_bytes)} bytes")
     
     print(f"\nAnalysis complete! 🎉")
     print(f"Time period analyzed: {time_gap} days")
@@ -216,6 +277,7 @@ def perform_ndvi_analysis(bbox, start_date, end_date, max_cloud_cover=15, max_si
     print(f"Max vegetation gain: {diff.max():.4f}")
     
     return {
+        "analysis_id": analysis_id,
         "time_gap_days": time_gap,
         "mean_ndvi_change": float(diff.mean()),
         "max_vegetation_loss": float(diff.min()),
@@ -230,11 +292,7 @@ def perform_ndvi_analysis(bbox, start_date, end_date, max_cloud_cover=15, max_si
             "datetime": str(late_item.datetime),
             "cloud_cover": late_item.properties.get("eo:cloud_cover")
         },
-        "files_generated": {
-            "early_ndvi": early_path,
-            "late_ndvi": late_path,
-            "difference": diff_path
-        },
+        "database_stored": True,
         "selection_info": selection_info,
         "selection_reason": selection_info["reason"],
         "date_deviations": selection_info.get("date_deviations", [0, 0])
