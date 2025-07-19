@@ -24,11 +24,6 @@ const DrawControl = ({ onCreated }: DrawControlProps) => {
             color: "#e91e63",
           },
         },
-        rectangle: {
-          shapeOptions: {
-            color: "#673ab7",
-          },
-        },
       },
       edit: {
         featureGroup: drawnItems,
