@@ -50,8 +50,6 @@
 * 📊 **Summarized Reports**
   Generate statistics, summaries, and visual reports of change.
 
-* 📴 **Offline Capable**
-  Lightweight and fully functional without internet access.
 
 ## 📦 Getting Started
 
