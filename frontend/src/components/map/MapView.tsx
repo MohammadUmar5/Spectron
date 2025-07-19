@@ -1,14 +1,14 @@
 import { useRef } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
-
 import "leaflet/dist/leaflet.css";
 import "leaflet-control-geocoder";
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
 import "leaflet-draw";
 import "leaflet-draw/dist/leaflet.draw.css";
-
 import SearchControl from "./SearchControl";
+import "@maptiler/geocoding-control/style.css";
+
 import DrawControl from "./DrawControl";
 
 type MapViewProps = {
@@ -44,7 +44,6 @@ const MapView = ({ onBoxDrawn }: MapViewProps) => {
 
     onBoxDrawn([minLon, minLat, maxLon, maxLat]);
   };
-
   return (
     <div className="w-full h-full relative">
       <MapContainer
@@ -56,8 +55,10 @@ const MapView = ({ onBoxDrawn }: MapViewProps) => {
         }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="© OpenStreetMap contributors"
+          url={`https://api.maptiler.com/maps/basic-v2/256/{z}/{x}/{y}.png?key=${
+            import.meta.env.VITE_MAPTILER_KEY
+          }`}
+          attribution="© MapTiler © OpenStreetMap contributors"
         />
         <SearchControl onLocationSelected={onBoxDrawn} />
         <DrawControl onCreated={handleAOICreated} />

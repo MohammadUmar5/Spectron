@@ -1,10 +1,12 @@
+import { Sidebar } from "../../components";
 import MapView from "../../components/map/MapView";
-import SideBar from "../../components/map/SideBar";
+import Widget from "../../components/map/Widget";
 
 const MapScreen = () => {
   return (
     <div className="flex map-screen-container h-full w-full">
-      <SideBar />
+      <Widget />
+      <Sidebar />
       <MapView />
     </div>
   );
