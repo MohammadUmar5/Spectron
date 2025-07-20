@@ -373,7 +373,8 @@ DB_CONFIG = {
     'host': os.getenv('DB_HOST'),
     'database': os.getenv('DB_NAME'),
     'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT')
+    'port': os.getenv('DB_PORT'),
+    'sslmode': 'require'
 }
 
 # Global database handler instance
