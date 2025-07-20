@@ -1,6 +1,6 @@
 import { useState } from "react";
 import MapView from "../../components/map/MapView";
-import SideBar from "../../components/map/SideBar";
+import Widget from "../../components/map/Widget";
 import { fetchNDVIAnalysis } from "../../services/backend";
 
 const Dashboard = () => {
@@ -9,7 +9,7 @@ const Dashboard = () => {
   const [box, setBox] = useState<[number, number, number, number] | null>(null);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
-
+  const [mode, setMode] = useState<string>("Exact");
   const handleSubmit = async () => {
     if (!startDate || !endDate || !box) {
       alert("Please select dates and draw an area on the map.");
@@ -18,7 +18,8 @@ const Dashboard = () => {
 
     setLoading(true);
     setImages([]);
-
+    //mode either exact/quality/smart
+    console.log(mode);
     try {
       const result = await fetchNDVIAnalysis({
         start_date: startDate,
@@ -47,12 +48,14 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col h-full w-full">
       <div className="flex flex-1">
-        <SideBar
+        <Widget
           startDate={startDate}
           endDate={endDate}
           setStartDate={setStartDate}
           setEndDate={setEndDate}
           onSubmit={handleSubmit}
+          setMode={setMode}
+          mode={mode}
         />
         <MapView onBoxDrawn={setBox} />
       </div>

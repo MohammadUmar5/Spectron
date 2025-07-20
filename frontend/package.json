@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@maptiler/geocoding-control": "^2.1.7",
     "@tailwindcss/vite": "^4.1.5",
     "@vercel/node": "^5.1.16",
     "dotenv": "^16.5.0",

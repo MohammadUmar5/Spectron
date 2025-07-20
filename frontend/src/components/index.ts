@@ -4,5 +4,13 @@ import HeroSection from "./landing/HeroSection";
 import NavBar from "./navigation/NavBar";
 import ProtectedRoute from "./navigation/ProtectedRoute";
 import RedirectToDashboard from "./navigation/RedirectToDashboard";
-
-export { Footer, NavBar, FeaturesSection, HeroSection, ProtectedRoute, RedirectToDashboard };
+import Sidebar from "./common/SideBar";
+export {
+  Footer,
+  NavBar,
+  FeaturesSection,
+  HeroSection,
+  ProtectedRoute,
+  RedirectToDashboard,
+  Sidebar,
+};
