@@ -4,6 +4,11 @@ import uuid
 from datetime import datetime
 from typing import Dict, Any, Optional, Tuple
 import hashlib
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class DatabaseHandler:
     def __init__(self, db_config: Dict[str, str]):
@@ -364,11 +369,11 @@ class DatabaseHandler:
 
 # Database configuration
 DB_CONFIG = {
-    'user': 'REDACTED_USER',
-    'host': 'localhost',
-    'database': 'REDACTED_DB',
-    'password': 'REDACTED',
-    'port': '5432'
+    'user': os.getenv('DB_USER'),
+    'host': os.getenv('DB_HOST'),
+    'database': os.getenv('DB_NAME'),
+    'password': os.getenv('DB_PASSWORD'),
+    'port': os.getenv('DB_PORT')
 }
 
 # Global database handler instance
