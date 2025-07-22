@@ -28,7 +28,6 @@
 * Rasterio
 * GDAL
 * OpenCV
-* SQLite
 
 ## 🚀 Features
 
